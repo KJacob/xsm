@@ -40,8 +40,8 @@
 #define DCR			39
 
 //Added
-#define STRING			40
-#define ILLTOKEN		41
+#define STRING		40
+#define ILLTOKEN	41
 
 #define LOAD		44
 #define STORE		45

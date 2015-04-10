@@ -7,35 +7,37 @@
 #include "data.h"
 #include "utility.h"
 
-#define DISABLE 0
-#define ENABLE 1
-
 #define COMMAND_LENGTH 50
 #define NUM_WATCH 16 // Maximum number of watch points that can be set
 
 int db_mode; 		// flag to check whether machine is run in debug mode or not
 int step_flag;		// flag to check whether debugging in single step mode
 
-char command[COMMAND_LENGTH],prev_command[COMMAND_LENGTH]; //buffer to store command and previous command.
+char command[COMMAND_LENGTH], prev_command[COMMAND_LENGTH]; //buffer to store command and previous command.
 
 // data structure for watch point
-typedef struct
-{
+typedef struct {
 	char value[WORD_SIZE];	// previous value of watched location
 	struct address addr; // address of watched location
-}watch_point;
+} watch_point;
 watch_point watch[NUM_WATCH];
 int watch_count; // number of the next watch point
 
 /*
+ *	This function enables Debugging Mode
+ */
+void enableDebugMode();
+
+int isDebugModeOn();
+/*
  * This function initializes all debug flags and buffers
  */
-void initialize_debug();
+void initializeDebug();
 
 /*
-  This function invokes a command line interface for debugging.
-*/
-void debug_interface();	
+ *	This function invokes a command line interface for debugging.
+ */
+void debugInterface();	
 
 /*
  * function processes each command the user enters
@@ -95,7 +97,7 @@ void printFAT();
  * invoking execution on errors.
  * returns page_no and word_no as -1 on failure
  */ 
-struct address translate_debug (int virtual_addr);
+struct address translateDebug(int virtual_addr);
  
 /* 
  * This function prints the memory location
@@ -104,14 +106,14 @@ void printLocation(struct address);
 
 /*
  * This function check whether the value of watch location has changed
- * If changed returns ENABLE after printing old and new value of location
- * If unchanged returns DISABLE
+ * If changed returns 1 after printing old and new value of location
+ * If unchanged returns 0
  */
 int checkWatch();
 
 /*
  * This function initialize a data structures for watch
  */
-void initialize_Watch();
+void initializeWatch();
  
 #endif

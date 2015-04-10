@@ -5,14 +5,14 @@
 #define BOOT_BLOCK	0
 
 /*
-  This function reads an entire page from address specified by blockNumber to pageNumber.
-*/
+ *	This function reads an entire page from address specified by blockNumber to pageNumber.
+ */
 int readFromDisk(int pageNumber, int blockNumber);
 
 
 /*
- This function writes an entire page to blocknumber from pageNumber.
-*/
+ *	This function writes an entire page to blocknumber from pageNumber.
+ */
 int writeToDisk(int pageNumber, int blockNumber);
 
 
