@@ -52,6 +52,8 @@ INT		{ yylval.flag = 0; yylval.flag2 = ILLREG; blank_count=0; return(INT); }
 END		{ yylval.flag = 0; yylval.flag2 = ILLREG; blank_count=0; return(END); }
 BRKP		{ yylval.flag = 0; yylval.flag2 = ILLREG; blank_count=0; return(BRKP); }
 IRET 		{ yylval.flag = 0; yylval.flag2 = ILLREG; blank_count=0; return(IRET);}
+BACKUP	{ yylval.flag = 0; yylval.flag2 = ILLREG; blank_count=0; return(BACKUP); }
+RESTORE	{ yylval.flag = 0; yylval.flag2 = ILLREG; blank_count=0; return(RESTORE); }
 SP 		{ yylval.flag = SP; yylval.flag2 = ILLREG; blank_count=0; return(SP_REG); }
 BP		{ yylval.flag = BP; yylval.flag2 = ILLREG; blank_count=0; return(BP_REG); }
 IP		{ yylval.flag = IP; yylval.flag2 = ILLREG; blank_count=0; return(IP_REG); }

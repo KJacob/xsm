@@ -1059,3 +1059,137 @@ int performLoadStore(int X, int flagX, int Y, int flagY, int instruction) {
 	} else if (instruction == STORE) writeToDisk(Y, X);
 	return 1;
 }
+
+int doBackup(int X, int flagX) {
+	int i = 0;
+	if (mode == USER_MODE) {
+		raiseException(newException(EX_ILLINSTR, "Call to Privileged Instruction BACKUP in USER mode", 0));
+		return 0;
+	}
+	Exception e = isSafeState2();
+	if (e.code != EX_NONE) {
+		raiseException(e);
+		return 0;
+	}
+	switch (flagX) {
+		case REG:
+			e = isRegisterInaccessible(X);
+			if (e.code != EX_NONE) {
+				raiseException(e);
+				return 0;
+			}
+			if (X < NO_USER_REG || X >= NO_USER_REG + NO_SYS_REG) {
+				raiseException(newException(EX_ILLINSTR, "Illegal operand. Only Si registers allowed", 0));
+				return 0;				
+			}
+			if (getType(reg[X]) == TYPE_STR) {
+				raiseException(newException(EX_ILLINSTR, "Illegal operand of type String.", 0));
+				return 0;
+			}
+			X = getInteger(reg[X]);
+			e = isRestrictedMemoryLocation(X);
+			if (e.code != EX_NONE) {
+				raiseException(e);
+				return 0;
+			}
+			storeWordToMemoryLocation(X + (i++), reg[BP]);
+			storeWordToMemoryLocation(X + (i++), reg[SP]);
+			storeWordToMemoryLocation(X + (i++), reg[PTBR]);
+			storeWordToMemoryLocation(X + (i++), reg[PTLR]);
+			storeWordToMemoryLocation(X + (i++), reg[R0]);
+			storeWordToMemoryLocation(X + (i++), reg[R1]);
+			storeWordToMemoryLocation(X + (i++), reg[R2]);
+			storeWordToMemoryLocation(X + (i++), reg[R3]);
+			storeWordToMemoryLocation(X + (i++), reg[R4]);
+			storeWordToMemoryLocation(X + (i++), reg[R5]);
+			storeWordToMemoryLocation(X + (i++), reg[R6]);
+			storeWordToMemoryLocation(X + (i++), reg[R7]);
+			storeWordToMemoryLocation(X + (i++), reg[S0]);
+			storeWordToMemoryLocation(X + (i++), reg[S1]);
+			storeWordToMemoryLocation(X + (i++), reg[S2]);
+			storeWordToMemoryLocation(X + (i++), reg[S3]);
+			storeWordToMemoryLocation(X + (i++), reg[S4]);
+			storeWordToMemoryLocation(X + (i++), reg[S5]);
+			storeWordToMemoryLocation(X + (i++), reg[S6]);
+			storeWordToMemoryLocation(X + (i++), reg[S7]);
+			storeWordToMemoryLocation(X + (i++), reg[S8]);
+			storeWordToMemoryLocation(X + (i++), reg[S9]);
+			storeWordToMemoryLocation(X + (i++), reg[S10]);
+			storeWordToMemoryLocation(X + (i++), reg[S11]);
+			storeWordToMemoryLocation(X + (i++), reg[S12]);
+			storeWordToMemoryLocation(X + (i++), reg[S13]);
+			storeWordToMemoryLocation(X + (i++), reg[S14]);
+			storeWordToMemoryLocation(X + (i++), reg[S15]);
+			break;
+		default:
+			raiseException(newException(EX_ILLINSTR, "Illegal operand.", 0));
+			return 0;
+	}
+}
+
+int doRestore(int X, int flagX) {
+	int i = 0;
+	if (mode == USER_MODE) {
+		raiseException(newException(EX_ILLINSTR, "Call to Privileged Instruction BACKUP in USER mode", 0));
+		return 0;
+	}
+	Exception e = isSafeState2();
+	if (e.code != EX_NONE) {
+		raiseException(e);
+		return 0;
+	}
+	switch (flagX) {
+		case REG:
+			e = isRegisterInaccessible(X);
+			if (e.code != EX_NONE) {
+				raiseException(e);
+				return 0;
+			}
+			if (X < NO_USER_REG && X >= NO_USER_REG + NO_SYS_REG) {
+				raiseException(newException(EX_ILLINSTR, "Illegal operand. Only Si registers allowed", 0));
+				return 0;				
+			}
+			if (getType(reg[X]) == TYPE_STR) {
+				raiseException(newException(EX_ILLINSTR, "Illegal operand of type String.", 0));
+				return 0;
+			}
+			X = getInteger(reg[X]);
+			e = isRestrictedMemoryLocation(X);
+			if (e.code != EX_NONE) {
+				raiseException(e);
+				return 0;
+			}
+			strcpy(reg[BP], getWordFromMemoryLocation(X + (i++)));
+			strcpy(reg[SP], getWordFromMemoryLocation(X + (i++)));
+			strcpy(reg[PTBR_REG], getWordFromMemoryLocation(X + (i++)));
+			strcpy(reg[PTLR_REG], getWordFromMemoryLocation(X + (i++)));
+			strcpy(reg[R0], getWordFromMemoryLocation(X + (i++)));
+			strcpy(reg[R1], getWordFromMemoryLocation(X + (i++)));
+			strcpy(reg[R2], getWordFromMemoryLocation(X + (i++)));
+			strcpy(reg[R3], getWordFromMemoryLocation(X + (i++)));
+			strcpy(reg[R4], getWordFromMemoryLocation(X + (i++)));
+			strcpy(reg[R5], getWordFromMemoryLocation(X + (i++)));
+			strcpy(reg[R6], getWordFromMemoryLocation(X + (i++)));
+			strcpy(reg[R7], getWordFromMemoryLocation(X + (i++)));
+			strcpy(reg[S0], getWordFromMemoryLocation(X + (i++)));
+			strcpy(reg[S1], getWordFromMemoryLocation(X + (i++)));
+			strcpy(reg[S2], getWordFromMemoryLocation(X + (i++)));
+			strcpy(reg[S3], getWordFromMemoryLocation(X + (i++)));
+			strcpy(reg[S4], getWordFromMemoryLocation(X + (i++)));
+			strcpy(reg[S5], getWordFromMemoryLocation(X + (i++)));
+			strcpy(reg[S6], getWordFromMemoryLocation(X + (i++)));
+			strcpy(reg[S7], getWordFromMemoryLocation(X + (i++)));
+			strcpy(reg[S8], getWordFromMemoryLocation(X + (i++)));
+			strcpy(reg[S9], getWordFromMemoryLocation(X + (i++)));
+			strcpy(reg[S10], getWordFromMemoryLocation(X + (i++)));
+			strcpy(reg[S11], getWordFromMemoryLocation(X + (i++)));
+			strcpy(reg[S12], getWordFromMemoryLocation(X + (i++)));
+			strcpy(reg[S13], getWordFromMemoryLocation(X + (i++)));
+			strcpy(reg[S14], getWordFromMemoryLocation(X + (i++)));
+			strcpy(reg[S15], getWordFromMemoryLocation(X + (i++)));
+			break;
+		default:
+			raiseException(newException(EX_ILLINSTR, "Illegal operand.", 0));
+			return 0;
+	}
+}

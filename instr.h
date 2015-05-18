@@ -71,4 +71,7 @@
 #define EVA		66
 #define EMA		67
 
+#define BACKUP 68
+#define RESTORE 69
+
 #define ILLREG			100

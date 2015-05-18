@@ -200,6 +200,22 @@ void executeOneInstruction(int instr) {
 			}
 			storeInteger(reg[IP_REG], getInteger(reg[IP_REG]) + WORDS_PER_INSTR);
 			break;
+
+		case BACKUP:
+			X = yylex();
+			flagX1 = yylval.flag;
+			if (!doBackup(X, flagX1)) return;
+			storeInteger(reg[IP_REG], getInteger(reg[IP_REG]) + WORDS_PER_INSTR);
+			break;
+
+		case RESTORE:
+			X = yylex();
+			flagX1 = yylval.flag;
+			if (!doRestore(X, flagX1)) return;
+			storeInteger(reg[IP_REG], getInteger(reg[IP_REG]) + WORDS_PER_INSTR);
+			break;
+
+
 		default:
 			raiseException(newException(EX_ILLINSTR, "Illegal Instruction", 0));
 			return;
