@@ -32,4 +32,5 @@ Exception isSafeState2();
 char * resolveOperand(int r, int flag1, int flag2, char * string);
 Exception isRegisterInaccessible(int);
 void raiseException(Exception);
+char * getWordFromMemoryLocation(int r);
 #endif

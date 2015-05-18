@@ -251,7 +251,11 @@ int getRegArg(char *arg) {
 	else if (strcmp(arg, "IP") == 0 || strcmp(arg, "ip") == 0) return(IP_REG);
 	else if (strcmp(arg, "PTBR") == 0 || strcmp(arg, "ptbr") == 0) return(PTBR_REG);
 	else if (strcmp(arg, "PTLR") == 0 || strcmp(arg, "ptlr") == 0) return(PTLR_REG);
-	else if (strcmp(arg, "EFR") == 0 || strcmp(arg, "efr") == 0) return(EFR_REG);
+	else if (strcmp(arg, "EIP") == 0 || strcmp(arg, "eip") == 0) return(EIP_REG);
+	else if (strcmp(arg, "EPN") == 0 || strcmp(arg, "epn") == 0) return(EPN_REG);
+	else if (strcmp(arg, "EC") == 0 || strcmp(arg, "ec") == 0) return(EC_REG);
+	else if (strcmp(arg, "EVA") == 0 || strcmp(arg, "eva") == 0) return(EVA_REG);
+	else if (strcmp(arg, "EMA") == 0 || strcmp(arg, "ema") == 0) return(EMA_REG);
 	else argvalue = atoi(arg + 1);
 	switch(arg[0]) {
 		case 'R':
@@ -292,8 +296,12 @@ void printRegisters(int arg1, int arg2) {
 			case PTLR_REG: 
 				printf("PTLR: %s\t", reg[PTLR_REG]);
 				break;
-			case EFR_REG: 
-				printf("EFR: %s\t", reg[EFR_REG]);
+			case EIP_REG:
+			case EPN_REG:
+			case EC_REG:
+			case EVA_REG:
+			case EMA_REG:
+				printf("EFR: %s\t", reg[arg1]);
 				break;		
 			default: 
 				if (arg1 < S0) printf("R%d: %s\t", arg1, reg[arg1]);

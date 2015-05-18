@@ -18,13 +18,12 @@ int getInstruction(char *instruction) {
 		return -1;
 	}
 	if (getInteger(reg[IP_REG]) < 0 || getInteger(reg[IP_REG]) + 1 >= SIZE_OF_MEM) {
-		raiseException(newException(EX_ILLMEM, "IP Register value out of bounds.\n", 0));
+		raiseException(newException(EX_ILLMEM, "IP Register value out of bounds.\n", getInteger(reg[IP_REG])));
 		return -1;
 	}
 	if (mode == USER_MODE) {
 		if (getInteger(reg[IP_REG]) < 0 || getInteger(reg[IP_REG]) + 1 >= getInteger(reg[PTLR_REG]) * PAGE_SIZE) {
-			printf("%d", getInteger(reg[IP_REG]));
-			raiseException(newException(EX_ILLOPERAND, "Illegal IP Access.\n", 0));
+			raiseException(newException(EX_ILLINSTR, "Illegal IP Access.\n", getInteger(reg[IP_REG])));
 			return -1;
 		}
 	}
@@ -118,12 +117,24 @@ void raiseException(Exception e) {
 		if (isDebugModeOn()) debugInterface();
 		exit(0);
 	} else {
-		int ex_flag;
-		ex_flag = getInteger(reg[IP_REG]) * 1000;
-		ex_flag += e.fault_page * 10;
-		ex_flag += e.code;
 		mode = KERNEL_MODE;
-		storeInteger(reg[EFR_REG], ex_flag);
+		strcpy(reg[EIP_REG], reg[IP_REG]);
+		storeInteger(reg[EC_REG], e.code);
+		if (e.code == EX_PAGEFAULT) storeInteger(reg[EPN_REG], e.fault);
+		int page_no = getInteger(reg[IP_REG]) / PAGE_SIZE;
+		int PTBRAddress = getInteger(reg[PTBR_REG]);
+		int n = 0;
+		while (n < 8) {
+			int addr = PTBRAddress + n;
+			char * value = getWordFromMemoryLocation(addr);
+			if (getInteger(value) == page_no) {
+				storeInteger(reg[EPN_REG], n / 2 + 1);
+				storeInteger(reg[EVA_REG], (n / 2) * PAGE_SIZE + getInteger(reg[IP_REG]) % PAGE_SIZE);
+				break;
+			}
+			n += 2;
+		}
+		if (e.code == EX_ILLMEM) storeInteger(reg[EMA_REG], e.fault);
 		storeInteger(reg[IP_REG], EXCEPTION_HANDLER * PAGE_SIZE);
 	}
 }
@@ -134,23 +145,23 @@ int isSafeState() {
 		return 0;
 	}
 	if (getInteger(reg[PTLR_REG]) < 0 || getInteger(reg[PTLR_REG]) >= SIZE_OF_MEM) {
-		raiseException(newException(EX_ILLMEM, "Illegal address access.\n PTLR value is out of bounds.\n", 0));
+		raiseException(newException(EX_ILLMEM, "Illegal address access.\n PTLR value is out of bounds.\n", getInteger(reg[PTLR_REG])));
 		return 0;
 	}
 	if (getInteger(reg[SP_REG]) + 1 < 0) {
-		raiseException(newException(EX_ILLMEM, "Stack underflow.\n", 0));
+		raiseException(newException(EX_ILLMEM, "Stack underflow.\n", getInteger(reg[SP_REG])));
 		return 0;
 	}
 	if (getInteger(reg[SP_REG]) >= SIZE_OF_MEM || (mode==USER_MODE && getInteger(reg[SP_REG]) >= getInteger(reg[PTLR_REG]) * PAGE_SIZE)) {
-		raiseException(newException(EX_ILLMEM, "Stack overflow.\n", 0));
+		raiseException(newException(EX_ILLMEM, "Stack overflow.\n", getInteger(reg[SP_REG])));
 		return 0;
 	}
 	if (getInteger(reg[BP_REG]) < 0) {
-		raiseException(newException(EX_ILLMEM, "Negative value for BP.\n", 0));
+		raiseException(newException(EX_ILLMEM, "Negative value for BP.\n", getInteger(reg[BP_REG])));
 		return 0;
 	}
 	if (getInteger(reg[BP_REG]) >= SIZE_OF_MEM || (mode==USER_MODE && getInteger(reg[BP_REG]) >= getInteger(reg[PTLR_REG]) * PAGE_SIZE)) {
-		raiseException(newException(EX_ILLMEM, "BP Register Value out of bounds.\n", 0));
+		raiseException(newException(EX_ILLMEM, "BP Register Value out of bounds.\n", getInteger(reg[SP_REG])));
 		return 0;
 	}
 	return 1;
@@ -159,22 +170,22 @@ int isSafeState() {
 
 Exception isRegisterInaccessible(int r) {
 	if (r < 0 || r > (NO_USER_REG + NO_SYS_REG + NO_TEMP_REG + NO_SPECIAL_REG)) {
-		return newException(EX_ILLOPERAND, "Invalid Register Provided", 0);
+		return newException(EX_ILLINSTR, "Invalid Register Provided", 0);
 	}
 	//	User Register
 	if (r >= R0 && r < R0 + NO_USER_REG) return newException(EX_NONE, "", 0);
 	//	System Register
 	if (r >= S0 && r < S0 + NO_SYS_REG + NO_TEMP_REG) {
 		if (mode == KERNEL_MODE) return newException(EX_NONE, "", 0);;
-		return newException(EX_ILLOPERAND, "Illegal Register Access in User Mode", 0);
+		return newException(EX_ILLINSTR, "Illegal Register Access in User Mode", 0);
 	}
 	//	Special Register
 	if (mode == KERNEL_MODE) return newException(EX_NONE, "", 0); 
 	if (r == SP_REG || r == BP_REG) return newException(EX_NONE, "", 0);
-	if (r == PTBR_REG) return newException(EX_ILLOPERAND, "Illegal Register Access in User Mode -> {PTBR}", 0);
-	if (r == PTLR_REG) return newException(EX_ILLOPERAND, "Illegal Register Access in User Mode -> {PTLR}", 0);
-	if (r == IP_REG) return newException(EX_ILLOPERAND, "Illegal Register Access in User Mode -> {IP}", 0);
-	if (r == EFR_REG) return newException(EX_ILLOPERAND, "Illegal Register Access in User Mode -> {EFR}", 0);
+	if (r == PTBR_REG) return newException(EX_ILLINSTR, "Illegal Register Access in User Mode -> {PTBR}", 0);
+	if (r == PTLR_REG) return newException(EX_ILLINSTR, "Illegal Register Access in User Mode -> {PTLR}", 0);
+	if (r == IP_REG) return newException(EX_ILLINSTR, "Illegal Register Access in User Mode -> {IP}", 0);
+	return newException(EX_ILLINSTR, "Illegal Register Access in User Mode -> {Excetion Flag Registers}", 0);
 }
 
 Exception isSafeState2() {
@@ -183,29 +194,29 @@ Exception isSafeState2() {
 		return newException(EX_ILLMEM, "Illegal Register value", 0);
 	}
 	if (getInteger(reg[PTBR_REG]) < 0 || getInteger(reg[PTBR_REG]) >= SIZE_OF_MEM) {
-		return newException(EX_ILLMEM, "Illegal address access.\n PTBR value is out of bounds.", 0);
+		return newException(EX_ILLMEM, "Illegal address access.\n PTBR value is out of bounds.", getInteger(reg[PTBR_REG]));
 	}
 	if (getInteger(reg[PTLR_REG]) < 0 || getInteger(reg[PTLR_REG]) >= SIZE_OF_MEM) {
-		return newException(EX_ILLMEM, "Illegal address access.\n PTLR value is out of bounds.", 0);
+		return newException(EX_ILLMEM, "Illegal address access.\n PTLR value is out of bounds.", getInteger(reg[PTLR_REG]));
 	}
 	if (getInteger(reg[SP_REG]) + 1 < 0) {
-		return newException(EX_ILLMEM, "Stack underflow\n", 0);
+		return newException(EX_ILLMEM, "Stack underflow\n", getInteger(reg[SP_REG]));
 	}
 	if (getInteger(reg[SP_REG]) >= SIZE_OF_MEM || (mode == USER_MODE && getInteger(reg[SP_REG]) >= getInteger(reg[PTLR_REG]) * PAGE_SIZE)) {
-		return newException(EX_ILLMEM, "Stack overflow\n", 0);
+		return newException(EX_ILLMEM, "Stack overflow\n", getInteger(reg[SP_REG]));
 	}
 	if (getInteger(reg[BP_REG]) < 0) {
-		return newException(EX_ILLMEM, "Negative Value for BP Register\n", 0);
+		return newException(EX_ILLMEM, "Negative Value for BP Register\n", getInteger(reg[BP_REG]));
 	}
 	if (getInteger(reg[BP_REG]) >= SIZE_OF_MEM || (mode == USER_MODE && getInteger(reg[BP_REG]) >= getInteger(reg[PTLR_REG]) * PAGE_SIZE)) {
-		return newException(EX_ILLMEM, "BP Register Value out of bounds\n", 0);
+		return newException(EX_ILLMEM, "BP Register Value out of bounds\n", getInteger(reg[BP_REG]));
 	}
 	return newException(EX_NONE, "", 0);	
 }
 
 Exception isRestrictedMemoryLocation(int x) {
 	if (x < 0 || x >= SIZE_OF_MEM || (mode == USER_MODE && x >= getInteger(reg[PTLR_REG]) * PAGE_SIZE)) {
-		return newException(EX_ILLMEM, "Illegal Memory Access", 0);
+		return newException(EX_ILLMEM, "Illegal Memory Access", x);
 	}
 	return newException(EX_NONE, "", 0);
 }
@@ -255,7 +266,11 @@ char * resolveOperand(int r, int flag1, int flag2, char * string) {
 		case IP:
 		case PTBR:
 		case PTLR:
-		case EFR:
+		case EIP:
+		case EPN:
+		case EC:
+		case EVA:
+		case EMA:
 			return reg[r];
 			break;
 		case NUM:
@@ -268,7 +283,7 @@ char * resolveOperand(int r, int flag1, int flag2, char * string) {
 			break;
 		case MEM_REG:
 			if (getType(reg[r]) == TYPE_STR) {
-				raiseException(newException(EX_ILLOPERAND, "String value supplied in lieu of Memory Address", 0));
+				raiseException(newException(EX_ILLINSTR, "String value supplied in lieu of Memory Address", 0));
 				return NULL;
 			}
 			e = isRestrictedMemoryLocation(getInteger(reg[r]));
@@ -288,12 +303,12 @@ char * resolveOperand(int r, int flag1, int flag2, char * string) {
 			break;
 		case MEM_IP:
 		case MEM_DIR_IP:		
-			raiseException(newException(EX_ILLOPERAND, "Cannot use memory reference with IP in any mode", 0));
+			raiseException(newException(EX_ILLINSTR, "Cannot use memory reference with IP in any mode", 0));
 			return NULL;
 			break;
 		case MEM_EFR:
 		case MEM_DIR_EFR:
-			raiseException(newException(EX_ILLOPERAND, "Cannot use memory reference with EFR in any mode", 0));
+			raiseException(newException(EX_ILLINSTR, "Cannot use memory reference with EFR in any mode", 0));
 			return NULL;
 			break;
 		case MEM_DIR:
@@ -301,7 +316,7 @@ char * resolveOperand(int r, int flag1, int flag2, char * string) {
 			break;
 		case MEM_DIR_REG:
 			if (getType(reg[flag2]) == TYPE_STR) {
-				raiseException(newException(EX_ILLOPERAND, "Illegal register value", 0));
+				raiseException(newException(EX_ILLINSTR, "Illegal register value", 0));
 				return NULL;
 			}
 			r += getInteger(reg[flag2]);
@@ -334,7 +349,7 @@ char * resolveOperand(int r, int flag1, int flag2, char * string) {
 			return getWordFromMemoryLocation(r);
 			break;
 		default:
-			raiseException(newException(EX_ILLOPERAND, "Illegal Source Operand", 0));
+			raiseException(newException(EX_ILLINSTR, "Illegal Source Operand", 0));
 			return NULL;
 			break;
 	}
@@ -366,16 +381,20 @@ int storeValue(int r, int flag1, int flag2, char * value) {
 			return 1;
 			break;
 		case IP:
-			raiseException(newException(EX_ILLOPERAND, "Cannot alter read-only register IP", 0));
+			raiseException(newException(EX_ILLINSTR, "Cannot alter read-only register IP", 0));
 			return 0;
 			break;
-		case EFR:
-			raiseException(newException(EX_ILLOPERAND, "Cannot alter read-only register EFR", 0));
+		case EIP:
+		case EPN:
+		case EC:
+		case EVA:
+		case EMA:
+			raiseException(newException(EX_ILLINSTR, "Cannot alter read-only register EFR", 0));
 			return 0;					
 			break;
 		case MEM_REG:
 			if (getType(reg[r]) == TYPE_STR) {
-				raiseException(newException(EX_ILLOPERAND, "String value supplied in lieu of Memory Address", 0));
+				raiseException(newException(EX_ILLINSTR, "String value supplied in lieu of Memory Address", 0));
 				return 0;
 			}
 			e = isRestrictedMemoryLocation(getInteger(reg[r]));
@@ -393,12 +412,12 @@ int storeValue(int r, int flag1, int flag2, char * value) {
 			break;
 		case MEM_IP:
 		case MEM_DIR_IP:
-			raiseException(newException(EX_ILLOPERAND, "Cannot use memory reference with IP in any mode", 0));
+			raiseException(newException(EX_ILLINSTR, "Cannot use memory reference with IP in any mode", 0));
 			return 0;
 			break;
 		case MEM_EFR:
 		case MEM_DIR_EFR:						
-			raiseException(newException(EX_ILLOPERAND, "Cannot use memory reference with EFR in any mode", 0));
+			raiseException(newException(EX_ILLINSTR, "Cannot use memory reference with EFR in any mode", 0));
 			return 0;
 			break;
 		case MEM_DIR:
@@ -411,7 +430,7 @@ int storeValue(int r, int flag1, int flag2, char * value) {
 			break;
 		case MEM_DIR_REG:
 			if (getType(reg[flag2]) == TYPE_STR) {
-				raiseException(newException(EX_ILLOPERAND, "Illegal register value", 0));
+				raiseException(newException(EX_ILLINSTR, "Illegal register value", 0));
 				return 0;
 			}
 			r += getInteger(reg[flag2]);
@@ -444,7 +463,7 @@ int storeValue(int r, int flag1, int flag2, char * value) {
 			return storeWordToMemoryLocation(r, value);
 			break;
 		default:
-			raiseException(newException(EX_ILLOPERAND, "Illegal Target Operand", 0));
+			raiseException(newException(EX_ILLINSTR, "Illegal Target Operand", 0));
 			return 0;
 			break;
 	}
@@ -469,21 +488,25 @@ int performArithmetic(int X, int flagX, int Y, int flagY, int operation) {
 				return 0;
 			}
 			if (getType(reg[X]) == TYPE_STR) {
-				raiseException(newException(EX_ILLOPERAND, "Illegal operand", 0));
+				raiseException(newException(EX_ILLINSTR, "Illegal operand", 0));
 				return 0;
 			}
 			valueX = X;
 			break;
 		case IP:
-			raiseException(newException(EX_ILLOPERAND, "Illegal operand IP. Cannot alter readonly register", 0));
+			raiseException(newException(EX_ILLINSTR, "Illegal operand IP. Cannot alter readonly register", 0));
 			return 0;
 			break;
-		case EFR:
-			raiseException(newException(EX_ILLOPERAND, "Illegal operand EFR. Cannot alter readonly register", 0));
+		case EIP:
+		case EPN:
+		case EC:
+		case EVA:
+		case EMA:
+			raiseException(newException(EX_ILLINSTR, "Illegal operand EFR. Cannot alter readonly register", 0));
 			return 0;
 			break;
 		default:
-			raiseException(newException(EX_ILLOPERAND, "Illegal operand", 0));
+			raiseException(newException(EX_ILLINSTR, "Illegal operand", 0));
 			return 0;
 			break;
 	}
@@ -495,13 +518,19 @@ int performArithmetic(int X, int flagX, int Y, int flagY, int operation) {
 			case BP:
 			case PTBR:
 			case PTLR:
+			case IP:
+			case EIP:
+			case EPN:
+			case EC:
+			case EVA:
+			case EMA:
 				e = isRegisterInaccessible(Y);
 				if (e.code != EX_NONE) {
 					raiseException(e);
 					return 0;
 				}
 				if (getType(reg[Y]) == TYPE_STR) {
-					raiseException(newException(EX_ILLOPERAND, "Illegal operand", 0));
+					raiseException(newException(EX_ILLINSTR, "Illegal operand", 0));
 					return 0;
 				}
 				valueY = getInteger(reg[Y]);
@@ -509,16 +538,8 @@ int performArithmetic(int X, int flagX, int Y, int flagY, int operation) {
 			case NUM:
 				valueY = Y;
 				break;
-			case IP:
-				raiseException(newException(EX_ILLOPERAND, "Illegal operand IP. Cannot alter readonly register", 0));
-				return 0;
-				break;
-			case EFR:
-				raiseException(newException(EX_ILLOPERAND, "Illegal operand EFR. Cannot alter readonly register", 0));
-				return 0;
-				break;
 			default:
-				raiseException(newException(EX_ILLOPERAND, "Illegal operand", 0));
+				raiseException(newException(EX_ILLINSTR, "Illegal operand", 0));
 				return 0;
 				break;
 		}
@@ -536,14 +557,14 @@ int performArithmetic(int X, int flagX, int Y, int flagY, int operation) {
 			break;
 		case DIV:
 			if (valueY == 0) {
-				raiseException(newException(EX_ILLOPERAND, "Divide by ZERO", 0));
+				raiseException(newException(EX_ILLINSTR, "Divide by ZERO", 0));
 				return 0;
 			}
 			storeInteger(reg[valueX], getInteger(reg[valueX]) / valueY);
 			break;
 		case MOD:
 			if (valueY == 0) {
-				raiseException(newException(EX_ILLOPERAND, "Divide by ZERO", 0));
+				raiseException(newException(EX_ILLINSTR, "Divide by ZERO", 0));
 				return 0;
 			}
 			storeInteger(reg[valueX], getInteger(reg[valueX]) % valueY);
@@ -568,7 +589,7 @@ int performMOV(int X, int flagX1, int flagX2, int Y, int flagY1, int flagY2, cha
 	if ((flagY1 == MEM_DIR_REG || flagY1 == MEM_DIR_SP || flagY1 == MEM_DIR_BP || flagY1 == MEM_DIR_PTBR || flagY1 == MEM_DIR_PTLR
 		|| flagY1 == MEM_DIR_IN) && (flagX1 == MEM_DIR_REG || flagX1 == MEM_DIR_SP || flagX1 == MEM_DIR_BP || flagX1 == MEM_DIR_PTBR
 		|| flagX1 == MEM_DIR_PTLR || flagX1 == MEM_DIR_IN)) {
-		raiseException(newException(EX_ILLOPERAND, "Illegal Operands", 0));
+		raiseException(newException(EX_ILLINSTR, "Illegal Operands", 0));
 		return 0;
 	}
 	return (storeValue(X, flagX1, flagX2, resolvedValue));
@@ -595,15 +616,19 @@ int performLogic(int X, int flagX, int Y, int flagY, int operation) {
 			}
 			break;
 		case IP:
-			raiseException(newException(EX_ILLOPERAND, "Illegal operand IP. Cannot alter readonly register", 0));
+			raiseException(newException(EX_ILLINSTR, "Illegal operand IP. Cannot alter readonly register", 0));
 			return 0;
 			break;
-		case EFR:
-			raiseException(newException(EX_ILLOPERAND, "Illegal operand EFR. Cannot alter readonly register", 0));
+		case EIP:
+		case EPN:
+		case EC:
+		case EVA:
+		case EMA:
+			raiseException(newException(EX_ILLINSTR, "Illegal operand EFR. Cannot alter readonly register", 0));
 			return 0;
 			break;
 		default:
-			raiseException(newException(EX_ILLOPERAND, "Illegal operand", 0));
+			raiseException(newException(EX_ILLINSTR, "Illegal operand", 0));
 			return 0;
 			break;
 	}
@@ -614,27 +639,25 @@ int performLogic(int X, int flagX, int Y, int flagY, int operation) {
 		case BP:
 		case PTBR:
 		case PTLR:
+		case IP:
+		case EIP:
+		case EPN:
+		case EC:
+		case EVA:
+		case EMA:
 			e = isRegisterInaccessible(Y);
 			if (e.code != EX_NONE) {
 				raiseException(e);
 				return 0;
 			}
 			break;
-		case IP:
-			raiseException(newException(EX_ILLOPERAND, "Illegal operand IP. Cannot alter readonly register", 0));
-			return 0;
-			break;
-		case EFR:
-			raiseException(newException(EX_ILLOPERAND, "Illegal operand EFR. Cannot alter readonly register", 0));
-			return 0;
-			break;
 		default:
-			raiseException(newException(EX_ILLOPERAND, "Illegal operand", 0));
+			raiseException(newException(EX_ILLINSTR, "Illegal operand", 0));
 			return 0;
 			break;
 	}
 	if (getType(reg[X]) != getType(reg[Y])) {
-		raiseException(newException(EX_ILLOPERAND, "Operand Type Mismatch to logical expression", 0));
+		raiseException(newException(EX_ILLINSTR, "Operand Type Mismatch to logical expression", 0));
 		return 0;
 	}
 	switch (operation) {
@@ -682,7 +705,11 @@ int performBranching(int X, int flagX, int Y, int flagY, int operation) {
 				case IP:
 				case PTBR:
 				case PTLR:
-				case EFR:
+				case EIP:
+				case EPN:
+				case EC:
+				case EVA:
+				case EMA:
 					e = isRegisterInaccessible(X);
 					if (e.code != EX_NONE) {
 						raiseException(e);
@@ -690,12 +717,12 @@ int performBranching(int X, int flagX, int Y, int flagY, int operation) {
 					}
 					break;					
 				default:
-					raiseException(newException(EX_ILLOPERAND, "Illegal operand", 0));
+					raiseException(newException(EX_ILLINSTR, "Illegal operand", 0));
 					return 0;
 					break;
 			}
 			if (flagY != NUM) {
-				raiseException(newException(EX_ILLOPERAND, "Illegal operand", 0));
+				raiseException(newException(EX_ILLINSTR, "Illegal operand", 0));
 				return 0;
 			}
 			e = isRestrictedMemoryLocation(Y);
@@ -709,7 +736,7 @@ int performBranching(int X, int flagX, int Y, int flagY, int operation) {
 			break;
 		case JMP:
 			if (flagX != NUM) {
-				raiseException(newException(EX_ILLOPERAND, "Illegal operand", 0));
+				raiseException(newException(EX_ILLINSTR, "Illegal operand", 0));
 				return 0;
 			}		
 			e = isRestrictedMemoryLocation(X);
@@ -739,7 +766,11 @@ int performPush(int X, int flagX) {
 		case IP:
 		case PTBR:
 		case PTLR:
-		case EFR:
+		case EIP:
+		case EPN:
+		case EC:
+		case EVA:
+		case EMA:
 			e = isRegisterInaccessible(X);
 			if (e.code != EX_NONE) {
 				raiseException(e);
@@ -751,7 +782,7 @@ int performPush(int X, int flagX) {
 			} else return 0;
 			break;
 		default:
-			raiseException(newException(EX_ILLOPERAND, "Illegal Operand", 0));
+			raiseException(newException(EX_ILLINSTR, "Illegal Operand", 0));
 			return 0;
 			break;
 	}
@@ -775,15 +806,19 @@ int performPop(int X, int flagX) {
 			return 1;
 			break;
 		case IP:
-			raiseException(newException(EX_ILLOPERAND, "Illegal operand IP. Cannot alter readonly register", 0));
+			raiseException(newException(EX_ILLINSTR, "Illegal operand IP. Cannot alter readonly register", 0));
 			return 0;
 			break;
-		case EFR:
-			raiseException(newException(EX_ILLOPERAND, "Illegal operand EFR. Cannot alter readonly register", 0));
+		case EIP:
+		case EPN:
+		case EC:
+		case EVA:
+		case EMA:
+			raiseException(newException(EX_ILLINSTR, "Illegal operand EFR. Cannot alter readonly register", 0));
 			return 0;
 			break;
 		default:
-			raiseException(newException(EX_ILLOPERAND, "Illegal Operand", 0));
+			raiseException(newException(EX_ILLINSTR, "Illegal Operand", 0));
 			return 0;
 			break;
 	}
@@ -796,7 +831,7 @@ int performCall(int X, int flagX) {
 		return 0;
 	}
 	if (flagX != NUM) {
-		raiseException(newException(EX_ILLOPERAND, "Illegal operand", 0));
+		raiseException(newException(EX_ILLINSTR, "Illegal operand", 0));
 		return 0;
 	}		
 	e = isRestrictedMemoryLocation(X);
@@ -842,7 +877,7 @@ int performINT(int X, int flagX) {
 		return 0;
 	}
 	if (flagX != NUM) {
-		raiseException(newException(EX_ILLOPERAND, "Illegal operand", 0));
+		raiseException(newException(EX_ILLINSTR, "Illegal operand", 0));
 		return;
 	}
 	invokeInterrupt(X);
@@ -874,7 +909,7 @@ int performIRET() {
 	int result = getInteger(value);
 	if (result < 0 || result >= getInteger(reg[PTLR_REG]) * PAGE_SIZE) {
 		mode = KERNEL_MODE;
-		raiseException(newException(EX_ILLMEM, "Illegal return address", 0));
+		raiseException(newException(EX_ILLMEM, "Illegal return address", result));
 		return 0;
 	}
 	storeInteger(reg[IP_REG], result);
@@ -898,14 +933,18 @@ int performIN(int X, int flagX) {
 			}
 			break;
 		case IP:
-			raiseException(newException(EX_ILLOPERAND, "Illegal operand IP. Cannot alter readonly register", 0));
+			raiseException(newException(EX_ILLINSTR, "Illegal operand IP. Cannot alter readonly register", 0));
 			return 0;
-		case EFR:
-			raiseException(newException(EX_ILLOPERAND, "Illegal operand EFR. Cannot alter readonly register", 0));
+		case EIP:
+		case EPN:
+		case EC:
+		case EVA:
+		case EMA:
+			raiseException(newException(EX_ILLINSTR, "Illegal operand EFR. Cannot alter readonly register", 0));
 			return 0;
 			break;
 		default:
-			raiseException(newException(EX_ILLOPERAND, "Illegal operand.", 0));
+			raiseException(newException(EX_ILLINSTR, "Illegal operand.", 0));
 			return 0;
 			break;
 	}
@@ -926,7 +965,11 @@ int performOUT(int X, int flagX) {
 		case IP:
 		case PTBR:
 		case PTLR:
-		case EFR:
+		case EIP:
+		case EPN:
+		case EC:
+		case EVA:
+		case EMA:
 			e = isRegisterInaccessible(X);
 			if (e.code != EX_NONE) {
 				raiseException(e);
@@ -934,7 +977,7 @@ int performOUT(int X, int flagX) {
 			}
 			break;
 		default:
-			raiseException(newException(EX_ILLOPERAND, "Illegal operand.", 0));
+			raiseException(newException(EX_ILLINSTR, "Illegal operand.", 0));
 			return 0;
 	}
 	printf("%s\n", reg[X]);
@@ -959,21 +1002,25 @@ int performLoadStore(int X, int flagX, int Y, int flagY, int instruction) {
 		case IP:
 		case PTBR:
 		case PTLR:
-		case EFR:
+		case EIP:
+		case EPN:
+		case EC:
+		case EVA:
+		case EMA:
 			e = isRegisterInaccessible(X);
 			if (e.code != EX_NONE) {
 				raiseException(e);
 				return 0;
 			}
 			if (getType(reg[X]) == TYPE_STR) {
-				raiseException(newException(EX_ILLOPERAND, "Illegal operand", 0));
+				raiseException(newException(EX_ILLINSTR, "Illegal operand", 0));
 				return 0;
 			} else X = getInteger(reg[X]);					
 			break;
 		case NUM:
 			break;
 		default:
-			raiseException(newException(EX_ILLOPERAND, "Illegal operand", 0));
+			raiseException(newException(EX_ILLINSTR, "Illegal operand", 0));
 			return 0;
 			break;
 	}
@@ -984,21 +1031,25 @@ int performLoadStore(int X, int flagX, int Y, int flagY, int instruction) {
 		case IP:
 		case PTBR:
 		case PTLR:
-		case EFR:
+		case EIP:
+		case EPN:
+		case EC:
+		case EVA:
+		case EMA:
 			e = isRegisterInaccessible(Y);
 			if (e.code != EX_NONE) {
 				raiseException(e);
 				return 0;
 			}
 			if (getType(reg[Y]) == TYPE_STR) {
-				raiseException(newException(EX_ILLOPERAND, "Illegal operand", 0));
+				raiseException(newException(EX_ILLINSTR, "Illegal operand", 0));
 				return 0;
 			} else Y = getInteger(reg[Y]);					
 			break;
 		case NUM:
 			break;
 		default:
-			raiseException(newException(EX_ILLOPERAND, "Illegal operand", 0));
+			raiseException(newException(EX_ILLINSTR, "Illegal operand", 0));
 			return 0;
 			break;
 	}

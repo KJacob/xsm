@@ -4,7 +4,7 @@
 struct Exception {
 	int code;
 	char message[150];
-	int fault_page;
+	int fault;
 };
 
 typedef struct Exception Exception;

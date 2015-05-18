@@ -57,7 +57,11 @@ BP		{ yylval.flag = BP; yylval.flag2 = ILLREG; blank_count=0; return(BP_REG); }
 IP		{ yylval.flag = IP; yylval.flag2 = ILLREG; blank_count=0; return(IP_REG); }
 PTBR		{ yylval.flag = PTBR; yylval.flag2 = ILLREG; blank_count=0; return(PTBR_REG); }
 PTLR		{ yylval.flag = PTLR; yylval.flag2 = ILLREG; blank_count=0; return(PTLR_REG); }
-EFR		{ yylval.flag = EFR; yylval.flag2 = ILLREG; blank_count=0; return(EFR_REG); } 	
+EIP		{ yylval.flag = EIP; yylval.flag2 = ILLREG; blank_count=0; return(EIP_REG); }
+EPN		{ yylval.flag = EPN; yylval.flag2 = ILLREG; blank_count=0; return(EPN_REG); }
+EC		{ yylval.flag = EC; yylval.flag2 = ILLREG; blank_count=0; return(EC_REG); }
+EVA		{ yylval.flag = EVA; yylval.flag2 = ILLREG; blank_count=0; return(EVA_REG); }
+EMA		{ yylval.flag = EMA; yylval.flag2 = ILLREG; blank_count=0; return(EMA_REG); }
 R[0-9]+ { 
 			yylval.flag = REG;
 			yytext++;
@@ -93,7 +97,11 @@ T[0-9]+	{
 \[IP\]		{ yylval.flag = MEM_IP; yylval.flag2 = ILLREG; blank_count=0; return(IP_REG); }		//error: Is this needed.
 \[PTBR\]	{ yylval.flag = MEM_PTBR; yylval.flag2 = ILLREG; blank_count=0; return(PTBR_REG); }
 \[PTLR\]	{ yylval.flag = MEM_PTLR; yylval.flag2 = ILLREG; blank_count=0; return(PTLR_REG); }
-\[EFR\]		{ yylval.flag = MEM_EFR; yylval.flag2 = ILLREG; blank_count=0; return(EFR_REG); }
+\[EIP\]		{ yylval.flag = MEM_EFR; yylval.flag2 = ILLREG; blank_count=0; return(EIP_REG); }
+\[EPN\]		{ yylval.flag = MEM_EFR; yylval.flag2 = ILLREG; blank_count=0; return(EPN_REG); }
+\[EC\]		{ yylval.flag = MEM_EFR; yylval.flag2 = ILLREG; blank_count=0; return(EC_REG); }
+\[EVA\]		{ yylval.flag = MEM_EFR; yylval.flag2 = ILLREG; blank_count=0; return(EVA_REG); }
+\[EMA\]		{ yylval.flag = MEM_EFR; yylval.flag2 = ILLREG; blank_count=0; return(EMA_REG); }
 \[R[0-9]+\] 	{	
 			yylval.flag = MEM_REG; yylval.flag2 = ILLREG; 
 			yytext[yyleng-1]='\0';
@@ -199,11 +207,39 @@ T[0-9]+	{
 				yylval.flag2 = PTLR_REG;
 				blank_count=0; return(atoi(yytext));					
 			}
-\[-?[0-9]+\]EFR		{
+\[-?[0-9]+\]EIP		{
 				yylval.flag = MEM_DIR_EFR;
 				yytext++;
 				decode_indexed_addr(yytext,tempbuf);	//Not at all tested. Vulnerable ***
-				yylval.flag2 = EFR_REG;
+				yylval.flag2 = EIP_REG;
+				blank_count=0; return(atoi(yytext));					
+			}					
+\[-?[0-9]+\]EPN		{
+				yylval.flag = MEM_DIR_EFR;
+				yytext++;
+				decode_indexed_addr(yytext,tempbuf);	//Not at all tested. Vulnerable ***
+				yylval.flag2 = EPN_REG;
+				blank_count=0; return(atoi(yytext));					
+			}					
+\[-?[0-9]+\]EC		{
+				yylval.flag = MEM_DIR_EFR;
+				yytext++;
+				decode_indexed_addr(yytext,tempbuf);	//Not at all tested. Vulnerable ***
+				yylval.flag2 = EC_REG;
+				blank_count=0; return(atoi(yytext));					
+			}					
+\[-?[0-9]+\]EVA		{
+				yylval.flag = MEM_DIR_EFR;
+				yytext++;
+				decode_indexed_addr(yytext,tempbuf);	//Not at all tested. Vulnerable ***
+				yylval.flag2 = EVA_REG;
+				blank_count=0; return(atoi(yytext));					
+			}					
+\[-?[0-9]+\]EMA		{
+				yylval.flag = MEM_DIR_EFR;
+				yytext++;
+				decode_indexed_addr(yytext,tempbuf);	//Not at all tested. Vulnerable ***
+				yylval.flag2 = EMA_REG;
 				blank_count=0; return(atoi(yytext));					
 			}					
 \[-?[0-9]+\]-?[0-9]+	{

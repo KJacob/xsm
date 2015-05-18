@@ -52,18 +52,23 @@
 
 #define PTBR		50
 #define PTLR		51
-#define EFR			52
-#define MEM_PTBR	53
-#define MEM_PTLR	54
-#define MEM_EFR		55
+#define MEM_PTBR	52
+#define MEM_PTLR	53
+#define MEM_EFR		54
 
-#define MEM_DIR_REG		56
-#define MEM_DIR_SP		57
-#define MEM_DIR_BP		58
-#define MEM_DIR_IP		59
-#define MEM_DIR_PTBR	60
-#define MEM_DIR_PTLR	61
-#define MEM_DIR_EFR		62
-#define MEM_DIR_IN		63
+#define MEM_DIR_REG		55
+#define MEM_DIR_SP		56
+#define MEM_DIR_BP		57
+#define MEM_DIR_IP		58
+#define MEM_DIR_PTBR	59
+#define MEM_DIR_PTLR	60
+#define MEM_DIR_EFR		61
+#define MEM_DIR_IN		62
 
-#define ILLREG			64
+#define EIP		63
+#define EPN		64
+#define EC		65
+#define EVA		66
+#define EMA		67
+
+#define ILLREG			100
