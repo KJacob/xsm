@@ -63,8 +63,13 @@ void run(int is_timer_enabled) {
 		if ((watch_count > 0 && checkWatch() == 1) || step_flag == 1) debugInterface();
 		if (isTimerCountZero() && is_timer_enabled && mode == USER_MODE) {
 			resetTimer();
-			invokeHardwareInterrupt(0);
+			invokeHardwareInterrupt(1);
 			if (step_flag == 1) printf("TIMER Interrupt\n");
+		}
+		if (isDiskControllerCountZero() && isDiskControllerCountZero && mode == USER_MODE) {
+			resetDiskcontroller();
+			invokeHardwareInterrupt(2);
+			if (step_flag == 1) printf("Disk Controller Interrupt\n");
 		}
 	}
 }
@@ -182,6 +187,16 @@ void executeOneInstruction(int instr) {
 			storeInteger(reg[IP_REG], getInteger(reg[IP_REG]) + WORDS_PER_INSTR);
 			break;
 				
+		case LOADA:
+		case STOREA:
+			X = yylex();
+			flagX1 = yylval.flag;
+			Y = yylex();
+			flagY1 = yylval.flag;
+			if (!performLoadStorea(X, flagX1, Y, flagY1, instr)) return;
+			storeInteger(reg[IP_REG], getInteger(reg[IP_REG]) + WORDS_PER_INSTR);
+			break;
+
 		case HALT:
 			if (mode == USER_MODE) {
 				raiseException(newException(EX_ILLINSTR, "Call to Privileged Instruction HALT in USER mode", 0));

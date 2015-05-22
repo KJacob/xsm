@@ -5,23 +5,16 @@
 #include "utility.h"
 #include <stdlib.h>
 
-#define NUM_INT				8
+#define NUM_INT				19
 #define PAGE_PER_INT		2
 
-#define INT0 				9	//TIMER
-#define INT1 				11
-#define INT2 				13
-#define INT3 				15
-#define INT4 				17
-#define INT5 				19
-#define INT6 				21
-#define INT7 				23
+#define INT0 				2	//EXHandler
 
-#define INT_START_PAGE					9
-#define SOFTWARE_INT_START_PAGE			11
+#define INT_START_PAGE					2
+#define SOFTWARE_INT_START_PAGE			10
 
-#define EXCEPTION_HANDLER				7
-#define TIMER_INTERRUPT_HANDLER			9
+#define EXCEPTION_HANDLER				2
+#define TIMER_INTERRUPT_HANDLER			4
 
 int isSafeToInvokeInterrupt(int);
 void invokeHardwareInterrupt(int);

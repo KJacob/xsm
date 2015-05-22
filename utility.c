@@ -1060,6 +1060,84 @@ int performLoadStore(int X, int flagX, int Y, int flagY, int instruction) {
 	return 1;
 }
 
+
+int performLoadStorea(int X, int flagX, int Y, int flagY, int instruction) {
+	if (mode == USER_MODE) {
+		raiseException(newException(EX_ILLINSTR, "Call to Privileged Instruction in USER mode", 0));		
+		return 0;
+	}
+	Exception e = isSafeState2();
+	if (e.code != EX_NONE) {
+		raiseException(e);
+		return 0;
+	}
+	switch (flagX) {
+		case REG:
+		case SP:
+		case BP:
+		case IP:
+		case PTBR:
+		case PTLR:
+		case EIP:
+		case EPN:
+		case EC:
+		case EVA:
+		case EMA:
+			e = isRegisterInaccessible(X);
+			if (e.code != EX_NONE) {
+				raiseException(e);
+				return 0;
+			}
+			if (getType(reg[X]) == TYPE_STR) {
+				raiseException(newException(EX_ILLINSTR, "Illegal operand", 0));
+				return 0;
+			} else X = getInteger(reg[X]);					
+			break;
+		case NUM:
+			break;
+		default:
+			raiseException(newException(EX_ILLINSTR, "Illegal operand", 0));
+			return 0;
+			break;
+	}
+	switch (flagY) {
+		case REG:
+		case SP:
+		case BP:
+		case IP:
+		case PTBR:
+		case PTLR:
+		case EIP:
+		case EPN:
+		case EC:
+		case EVA:
+		case EMA:
+			e = isRegisterInaccessible(Y);
+			if (e.code != EX_NONE) {
+				raiseException(e);
+				return 0;
+			}
+			if (getType(reg[Y]) == TYPE_STR) {
+				raiseException(newException(EX_ILLINSTR, "Illegal operand", 0));
+				return 0;
+			} else Y = getInteger(reg[Y]);					
+			break;
+		case NUM:
+			break;
+		default:
+			raiseException(newException(EX_ILLINSTR, "Illegal operand", 0));
+			return 0;
+			break;
+	}
+	if (instruction == LOAD) {			
+		emptyPage(X);
+		readFromDisk(X, Y);
+	} else if (instruction == STORE) writeToDisk(Y, X);
+	resetDiskcontroller();
+	return 1;
+}
+
+
 int doBackup(int X, int flagX) {
 	int i = 0;
 	if (mode == USER_MODE) {

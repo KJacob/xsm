@@ -74,4 +74,7 @@
 #define BACKUP 68
 #define RESTORE 69
 
+#define LOADA 70
+#define STOREA 71
+
 #define ILLREG			100

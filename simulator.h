@@ -2,6 +2,7 @@
 #define SIMULATOR_H
 #include "lex.yy.c"
 #include "timer.h"
+#include "diskcontroller.h"
 #include "boot.h"
 #include "utility.h"
 #include "debug.h"
