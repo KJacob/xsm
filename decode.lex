@@ -52,6 +52,12 @@ INT		{ yylval.flag = 0; yylval.flag2 = ILLREG; blank_count=0; return(INT); }
 END		{ yylval.flag = 0; yylval.flag2 = ILLREG; blank_count=0; return(END); }
 BRKP		{ yylval.flag = 0; yylval.flag2 = ILLREG; blank_count=0; return(BRKP); }
 IRET 		{ yylval.flag = 0; yylval.flag2 = ILLREG; blank_count=0; return(IRET);}
+PORT 		{yylval.flag = 0; yylval.flag2 = ILLREG; blank_count=0; return(PORT);}
+INA 		{yylval.flag = 0; yylval.flag2 = ILLREG; blank_count=0; return(INA);}
+READA		{yylval.flag = 0; yylval.flag2 = ILLREG; blank_count=0; return(READA);}
+STOREA 		{yylval.flag = 0; yylval.flag2 = ILLREG; blank_count=0; return(STOREA);}
+ENCRYPT 		{yylval.flag = 0; yylval.flag2 = ILLREG; blank_count=0; return(ENCRYPT);}
+RESTORE 		{yylval.flag = 0; yylval.flag2 = ILLREG; blank_count=0; return(RESTORE);}
 SP 		{ yylval.flag = SP; yylval.flag2 = ILLREG; blank_count=0; return(SP_REG); }
 BP		{ yylval.flag = BP; yylval.flag2 = ILLREG; blank_count=0; return(BP_REG); }
 IP		{ yylval.flag = IP; yylval.flag2 = ILLREG; blank_count=0; return(IP_REG); }
@@ -68,26 +74,7 @@ R[0-9]+ {
 			yylval.flag2 = tempnum + R0;	
 			return(tempnum + R0);
 		}
-S[0-9]+ { 
-			yylval.flag = REG;
-			yytext++;
-			tempnum = atoi(yytext);
-			blank_count=0; 
-			if(tempnum > 15)
-				return ILLREG;
-			yylval.flag2 = tempnum + S0;
-			return(tempnum + S0);
-		}
-T[0-9]+	{ 
-			yylval.flag = REG;
-			yytext++;
-			tempnum = atoi(yytext);
-			blank_count=0; 
-			if(tempnum > 3)
-				return ILLREG;
-			yylval.flag2 = tempnum + T0;
-			return(tempnum + T0);
-		}
+
 \[SP\]		{ yylval.flag = MEM_SP; yylval.flag2 = ILLREG; blank_count=0; return(SP_REG); }
 \[BP\]		{ yylval.flag = MEM_BP; yylval.flag2 = ILLREG; blank_count=0; return(BP_REG); }
 \[IP\]		{ yylval.flag = MEM_IP; yylval.flag2 = ILLREG; blank_count=0; return(IP_REG); }		//error: Is this needed.
@@ -104,26 +91,7 @@ T[0-9]+	{
 				return ILLREG;
 			return(tempnum + R0); 
 		}
-\[S[0-9]+\]	{
-			yylval.flag = MEM_REG; yylval.flag2 = ILLREG; 
-			yytext[yyleng-1]='\0';
-			yytext=yytext+2;
-			tempnum = atoi(yytext);
-			blank_count=0; 
-			if(tempnum > 15)
-				return ILLREG;
-			return(tempnum + S0); 
-		}
-\[T[0-9]+\]	{
-			yylval.flag = MEM_REG; yylval.flag2 = ILLREG; 
-			yytext[yyleng-1]='\0';
-			yytext=yytext+2;
-			tempnum = atoi(yytext);
-			blank_count=0;
-			if(tempnum > 3)
-				return ILLREG;
-			return(tempnum + T0); 
-		}
+
 -?[0-9]+		{ yylval.flag = NUM; yylval.flag2 = ILLREG; blank_count=0; return(atoi(yytext)); }
 \[[0-9]+\]		{
 				yylval.flag = MEM_DIR; yylval.flag2 = ILLREG;
@@ -142,28 +110,7 @@ T[0-9]+	{
 					yylval.flag2 =  tempnum + R0;
 				blank_count=0; return(atoi(yytext));					
 			}
-\[-?[0-9]+\]S[0-9]+	{
-				yylval.flag = MEM_DIR_REG;
-				yytext++;
-				decode_indexed_addr(yytext,tempbuf);	//Not at all tested. Vulnerable ***
-				tempnum = atoi(tempbuf);
-				if(tempnum > 15)
-					yylval.flag2 = ILLREG;
-				else
-					yylval.flag2 =  tempnum + S0;
-				blank_count=0; return(atoi(yytext));					
-			}
-\[-?[0-9]+\]T[0-9]+	{
-				yylval.flag = MEM_DIR_REG;
-				yytext++;
-				decode_indexed_addr(yytext,tempbuf);	//Not at all tested. Vulnerable ***
-				tempnum = atoi(tempbuf);
-				if(tempnum > 3)
-					yylval.flag2 = ILLREG;
-				else
-					yylval.flag2 =  tempnum + T0;
-				blank_count=0; return(atoi(yytext));					
-			}
+			
 \[-?[0-9]+\]SP		{
 				yylval.flag = MEM_DIR_SP;
 				yytext++;

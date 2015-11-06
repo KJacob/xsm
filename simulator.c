@@ -15,14 +15,14 @@ int parseArgument(char * arg) {
 				setTimeSlice(flag_intValue);
 				return 0;
 			} else if (flag_intValue != 0) {
-				printf("Invalid arguement %d to timer flag. Timer value should be between 0 and 1024\n", flag_intValue);
+				printf("Invalid argument %d to timer flag. Timer value should be between 0 and 1024\n", flag_intValue);
 				return -1;
 			} else {
 				disableTimer();
 				return 0;
 			}
 		} else {
-			printf("Invalid arguement %s", arg);
+			printf("Invalid argument %s", arg);
 			return -1;
 		}
 	}
