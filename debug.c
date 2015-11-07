@@ -251,27 +251,26 @@ int getRegArg(char *arg) {
 	else if (strcmp(arg, "IP") == 0 || strcmp(arg, "ip") == 0) return(IP_REG);
 	else if (strcmp(arg, "PTBR") == 0 || strcmp(arg, "ptbr") == 0) return(PTBR_REG);
 	else if (strcmp(arg, "PTLR") == 0 || strcmp(arg, "ptlr") == 0) return(PTLR_REG);
-	else if (strcmp(arg, "EFR") == 0 || strcmp(arg, "efr") == 0) return(EFR_REG);
+	else if (strcmp(arg, "EIP") == 0 || strcmp(arg, "eip") == 0) return(EIP_REG);
+	else if (strcmp(arg, "EC") == 0 || strcmp(arg, "ec") == 0) return(EC_REG);
+	else if (strcmp(arg, "EMA") == 0 || strcmp(arg, "ema") == 0) return(EMA_REG);
+	else if (strcmp(arg, "EPN") == 0 || strcmp(arg, "epn") == 0) return(EPN_REG);
 	else argvalue = atoi(arg + 1);
 	switch(arg[0]) {
 		case 'R':
 		case 'r':
 			return(R0 + argvalue);
 			break;
-		case 'S':
-		case 's':
-			return(S0 + argvalue);
-			break;
-		case 'T':
-		case 't':
-			return(T0 + argvalue);
+		case 'P':
+		case 'p':
+			return(P0 + argvalue);
 			break;
 	}
 	return -1;
 }
 
 /* Prints all the registers if arg is -1, 
- * otherwise prints the register passed as argument
+ * Print range of registers from arg1 to arg2.
  */
 void printRegisters(int arg1, int arg2) {
 	int i=1;
@@ -292,13 +291,21 @@ void printRegisters(int arg1, int arg2) {
 			case PTLR_REG: 
 				printf("PTLR: %s\t", reg[PTLR_REG]);
 				break;
-			case EFR_REG: 
-				printf("EFR: %s\t", reg[EFR_REG]);
-				break;		
+			case EIP_REG: 
+				printf("EIP: %s\t", reg[EIP_REG]);
+				break;
+			case EC_REG: 
+				printf("EC: %s\t", reg[EC_REG]);
+				break;
+			case EMA_REG: 
+				printf("EMA: %s\t", reg[EMA_REG]);
+				break;
+			case EPN_REG: 
+				printf("EPN: %s\t", reg[EPN_REG]);
+				break;	
 			default: 
-				if (arg1 < S0) printf("R%d: %s\t", arg1, reg[arg1]);
-				else if (arg1 < T0) printf("S%d: %s\t", arg1 - S0, reg[arg1]);
-				else printf("T%d: %s\t", arg1 - T0, reg[arg1]);
+				if (R0 <= arg1 &&  arg1 <= R19) printf("R%d: %s\t", arg1, reg[arg1]);
+				else printf("P%d: %s\t", arg1 - P0, reg[arg1]);
 				break;
 		}
 		if(i % 4 == 0) printf("\n");

@@ -63,7 +63,11 @@ BP		{ yylval.flag = BP; yylval.flag2 = ILLREG; blank_count=0; return(BP_REG); }
 IP		{ yylval.flag = IP; yylval.flag2 = ILLREG; blank_count=0; return(IP_REG); }
 PTBR		{ yylval.flag = PTBR; yylval.flag2 = ILLREG; blank_count=0; return(PTBR_REG); }
 PTLR		{ yylval.flag = PTLR; yylval.flag2 = ILLREG; blank_count=0; return(PTLR_REG); }
-EFR		{ yylval.flag = EFR; yylval.flag2 = ILLREG; blank_count=0; return(EFR_REG); } 	
+EIP		{yylval.flag = EIP; yylval.flag2 = ILLREG; blank_count = 0; return(EIP);}
+EC		{yylval.flag = EC; yylval.flag2 = ILLREG; blank_count = 0; return(EC);}
+EPN		{yylval.flag = EPN; yylval.flag2 = ILLREG; blank_count = 0; return(EPN);}
+EMA		{yylval.flag = EMA; yylval.flag2 = ILLREG; blank_count = 0; return(EMA);}
+
 R[0-9]+ { 
 			yylval.flag = REG;
 			yytext++;

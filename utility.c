@@ -123,7 +123,10 @@ void raiseException(Exception e) {
 		ex_flag += e.fault_page * 10;
 		ex_flag += e.code;
 		mode = KERNEL_MODE;
-		storeInteger(reg[EFR_REG], ex_flag);
+		storeInteger(reg[EMA_REG], e.fault_page);//TODO Change e.fault_page to memory address
+		storeInteger(reg[EIP_REG], getInteger(reg[IP_REG]);
+		storeInteger(reg[EC_REG], e.cause);
+		storeInteger(reg[EPN_REG], e.fault_page);
 		storeInteger(reg[IP_REG], EXCEPTION_HANDLER * PAGE_SIZE);
 	}
 }
@@ -158,13 +161,13 @@ int isSafeState() {
 
 
 Exception isRegisterInaccessible(int r) {
-	if (r < 0 || r > (NO_USER_REG + NO_SYS_REG + NO_TEMP_REG + NO_SPECIAL_REG)) {
+	if (r < 0 || r > (NO_USER_REG + NO_PORTS + NO_SPECIAL_REG)) {
 		return newException(EX_ILLOPERAND, "Invalid Register Provided", 0);
 	}
 	//	User Register
 	if (r >= R0 && r < R0 + NO_USER_REG) return newException(EX_NONE, "", 0);
 	//	System Register
-	if (r >= S0 && r < S0 + NO_SYS_REG + NO_TEMP_REG) {
+	if (r >= P0 && r < P0 + NO_PORTS) {
 		if (mode == KERNEL_MODE) return newException(EX_NONE, "", 0);;
 		return newException(EX_ILLOPERAND, "Illegal Register Access in User Mode", 0);
 	}
@@ -174,7 +177,10 @@ Exception isRegisterInaccessible(int r) {
 	if (r == PTBR_REG) return newException(EX_ILLOPERAND, "Illegal Register Access in User Mode -> {PTBR}", 0);
 	if (r == PTLR_REG) return newException(EX_ILLOPERAND, "Illegal Register Access in User Mode -> {PTLR}", 0);
 	if (r == IP_REG) return newException(EX_ILLOPERAND, "Illegal Register Access in User Mode -> {IP}", 0);
-	if (r == EFR_REG) return newException(EX_ILLOPERAND, "Illegal Register Access in User Mode -> {EFR}", 0);
+	if (r == EIP_REG) return newException(EX_ILLOPERAND, "Illegal Register Access in User Mode -> {EIP}", 0);
+	if (r == EC_REG) return newException(EX_ILLOPERAND, "Illegal Register Access in User Mode -> {EC}", 0);
+	if (r == EPN_REG) return newException(EX_ILLOPERAND, "Illegal Register Access in User Mode -> {EPN}", 0);
+	if (r == EMA_REG) return newException(EX_ILLOPERAND, "Illegal Register Access in User Mode -> {EMA}", 0);
 }
 
 Exception isSafeState2() {

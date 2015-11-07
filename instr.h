@@ -69,10 +69,11 @@
 #define ILLREG			64
 
 /* New instructions */
-#define PORT 65
-#define INA 66
-#define READA 67
-#define STOREA 68
-#define ENCRYPT 69
-#define RESTORE 70
-#define BACKUP 71
+#define PORT 			65
+#define INA 			66
+#define READA 			67
+#define STOREA 			68
+#define ENCRYPT 		69
+#define RESTORE 		70
+#define BACKUP 			71
+#define LOADA 			72
