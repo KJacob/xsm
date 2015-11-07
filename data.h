@@ -29,15 +29,20 @@
 #define R18		18
 #define R19		19
 
+#define P0 		20
+#define P1 		21
+#define P2		22
+#define P3 		23
+
 #define BP_REG		28
 #define SP_REG		29
 #define IP_REG		30
 #define PTBR_REG	31
 #define PTLR_REG	32
 #define EIP_REG		33
-#define EC			33
-#define EPN			33
-#define EMA			33
+#define EC			34
+#define EPN			35
+#define EMA			36
 
 #define NO_USER_REG		20
 #define NO_SPECIAL_REG	9

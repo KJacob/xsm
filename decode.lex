@@ -75,6 +75,14 @@ R[0-9]+ {
 			return(tempnum + R0);
 		}
 
+P[0-3] {
+			yylval.flag = PORT;
+			yytext++;
+			tempnum = atoi(yytext);
+			yylval.flag2 = tempnum + P0;
+			return yylval.flag2;
+		}
+
 \[SP\]		{ yylval.flag = MEM_SP; yylval.flag2 = ILLREG; blank_count=0; return(SP_REG); }
 \[BP\]		{ yylval.flag = MEM_BP; yylval.flag2 = ILLREG; blank_count=0; return(BP_REG); }
 \[IP\]		{ yylval.flag = MEM_IP; yylval.flag2 = ILLREG; blank_count=0; return(IP_REG); }		//error: Is this needed.
