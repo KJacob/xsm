@@ -52,28 +52,37 @@
 
 #define PTBR		50
 #define PTLR		51
-#define EFR			52
-#define MEM_PTBR	53
-#define MEM_PTLR	54
-#define MEM_EFR		55
+#define EIP			52
+#define EC			53
+#define EPN			54
+#define EMA			55
+#define MEM_PTBR	56
+#define MEM_PTLR	57
+#define MEM_EIP		58
+#define MEM_EC		59
+#define MEM_EPN		60
+#define MEM_EMA		61
 
-#define MEM_DIR_REG		56
-#define MEM_DIR_SP		57
-#define MEM_DIR_BP		58
-#define MEM_DIR_IP		59
-#define MEM_DIR_PTBR	60
-#define MEM_DIR_PTLR	61
-#define MEM_DIR_EFR		62
-#define MEM_DIR_IN		63
+#define MEM_DIR_REG		62
+#define MEM_DIR_SP		63
+#define MEM_DIR_BP		64
+#define MEM_DIR_IP		65
+#define MEM_DIR_PTBR	66
+#define MEM_DIR_PTLR	67
+#define MEM_DIR_EIP		68
+#define MEM_DIR_EC		69
+#define MEM_DIR_EPN		70
+#define MEM_DIR_EMA		71
+#define MEM_DIR_IN		72
 
-#define ILLREG			64
+#define ILLREG			67
 
 /* New instructions */
-#define PORT 			65
-#define INA 			66
-#define READA 			67
-#define STOREA 			68
-#define ENCRYPT 		69
-#define RESTORE 		70
-#define BACKUP 			71
-#define LOADA 			72
+#define PORT 			68
+#define INA 			69
+#define READA 			70
+#define STOREA 			71
+#define ENCRYPT 		72
+#define RESTORE 		73
+#define BACKUP 			74
+#define LOADA 			75

@@ -92,7 +92,6 @@ P[0-3] {
 \[IP\]		{ yylval.flag = MEM_IP; yylval.flag2 = ILLREG; blank_count=0; return(IP_REG); }		//error: Is this needed.
 \[PTBR\]	{ yylval.flag = MEM_PTBR; yylval.flag2 = ILLREG; blank_count=0; return(PTBR_REG); }
 \[PTLR\]	{ yylval.flag = MEM_PTLR; yylval.flag2 = ILLREG; blank_count=0; return(PTLR_REG); }
-\[EFR\]		{ yylval.flag = MEM_EFR; yylval.flag2 = ILLREG; blank_count=0; return(EFR_REG); }
 \[R[0-9]+\] 	{	
 			yylval.flag = MEM_REG; yylval.flag2 = ILLREG; 
 			yytext[yyleng-1]='\0';
@@ -158,11 +157,32 @@ P[0-3] {
 				yylval.flag2 = PTLR_REG;
 				blank_count=0; return(atoi(yytext));					
 			}
-\[-?[0-9]+\]EFR		{
-				yylval.flag = MEM_DIR_EFR;
+\[-?[0-9]+\]EIP		{									//Do we really need this feature for these exception registers
+				yylval.flag = MEM_DIR_EIP;
 				yytext++;
 				decode_indexed_addr(yytext,tempbuf);	//Not at all tested. Vulnerable ***
-				yylval.flag2 = EFR_REG;
+				yylval.flag2 = EIP_REG;
+				blank_count=0; return(atoi(yytext));					
+			}			
+\[-?[0-9]+\]EC		{
+				yylval.flag = MEM_DIR_EC;
+				yytext++;
+				decode_indexed_addr(yytext,tempbuf);	//Not at all tested. Vulnerable ***
+				yylval.flag2 = EC_REG;
+				blank_count=0; return(atoi(yytext));					
+			}			
+\[-?[0-9]+\]EPN		{
+				yylval.flag = MEM_DIR_EPN;
+				yytext++;
+				decode_indexed_addr(yytext,tempbuf);	//Not at all tested. Vulnerable ***
+				yylval.flag2 = EPN_REG;
+				blank_count=0; return(atoi(yytext));					
+			}			
+\[-?[0-9]+\]EMA		{
+				yylval.flag = MEM_DIR_EMA;
+				yytext++;
+				decode_indexed_addr(yytext,tempbuf);	//Not at all tested. Vulnerable ***
+				yylval.flag2 = EMA_REG;
 				blank_count=0; return(atoi(yytext));					
 			}					
 \[-?[0-9]+\]-?[0-9]+	{

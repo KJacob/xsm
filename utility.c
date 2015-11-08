@@ -124,8 +124,8 @@ void raiseException(Exception e) {
 		ex_flag += e.code;
 		mode = KERNEL_MODE;
 		storeInteger(reg[EMA_REG], e.fault_page);//TODO Change e.fault_page to memory address
-		storeInteger(reg[EIP_REG], getInteger(reg[IP_REG]);
-		storeInteger(reg[EC_REG], e.cause);
+		storeInteger(reg[EIP_REG], getInteger(reg[IP_REG]));
+		storeInteger(reg[EC_REG], e.code);
 		storeInteger(reg[EPN_REG], e.fault_page);
 		storeInteger(reg[IP_REG], EXCEPTION_HANDLER * PAGE_SIZE);
 	}
