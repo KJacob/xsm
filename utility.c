@@ -261,7 +261,10 @@ char * resolveOperand(int r, int flag1, int flag2, char * string) {
 		case IP:
 		case PTBR:
 		case PTLR:
-		case EFR:
+		case EIP:
+		case EC:
+		case EPN:
+		case EMA:
 			return reg[r];
 			break;
 		case NUM:
@@ -297,9 +300,24 @@ char * resolveOperand(int r, int flag1, int flag2, char * string) {
 			raiseException(newException(EX_ILLOPERAND, "Cannot use memory reference with IP in any mode", 0));
 			return NULL;
 			break;
-		case MEM_EFR:
-		case MEM_DIR_EFR:
-			raiseException(newException(EX_ILLOPERAND, "Cannot use memory reference with EFR in any mode", 0));
+		case MEM_EIP:
+		case MEM_DIR_EIP:
+			raiseException(newException(EX_ILLOPERAND, "Cannot use memory reference with EIP in any mode", 0));
+			return NULL;
+			break;
+		case MEM_EC:
+		case MEM_DIR_EC:
+			raiseException(newException(EX_ILLOPERAND, "Cannot use memory reference with EC in any mode", 0));
+			return NULL;
+			break;
+		case MEM_EPN:
+		case MEM_DIR_EPN:
+			raiseException(newException(EX_ILLOPERAND, "Cannot use memory reference with EPN in any mode", 0));
+			return NULL;
+			break;
+		case MEM_EMA:
+		case MEM_DIR_EMA:
+			raiseException(newException(EX_ILLOPERAND, "Cannot use memory reference with EMA in any mode", 0));
 			return NULL;
 			break;
 		case MEM_DIR:
@@ -375,9 +393,21 @@ int storeValue(int r, int flag1, int flag2, char * value) {
 			raiseException(newException(EX_ILLOPERAND, "Cannot alter read-only register IP", 0));
 			return 0;
 			break;
-		case EFR:
-			raiseException(newException(EX_ILLOPERAND, "Cannot alter read-only register EFR", 0));
-			return 0;					
+		case EIP:
+			raiseException(newException(EX_ILLOPERAND, "Illegal operand EIP. Cannot alter readonly register", 0));
+			return 0;
+			break;
+		case EC:
+			raiseException(newException(EX_ILLOPERAND, "Illegal operand EC. Cannot alter readonly register", 0));
+			return 0;
+			break;
+		case EPN:
+			raiseException(newException(EX_ILLOPERAND, "Illegal operand EPN. Cannot alter readonly register", 0));
+			return 0;
+			break;
+		case EMA:
+			raiseException(newException(EX_ILLOPERAND, "Illegal operand EMA. Cannot alter readonly register", 0));
+			return 0;
 			break;
 		case MEM_REG:
 			if (getType(reg[r]) == TYPE_STR) {
@@ -402,9 +432,24 @@ int storeValue(int r, int flag1, int flag2, char * value) {
 			raiseException(newException(EX_ILLOPERAND, "Cannot use memory reference with IP in any mode", 0));
 			return 0;
 			break;
-		case MEM_EFR:
-		case MEM_DIR_EFR:						
-			raiseException(newException(EX_ILLOPERAND, "Cannot use memory reference with EFR in any mode", 0));
+		case MEM_EIP:
+		case MEM_DIR_EIP:
+			raiseException(newException(EX_ILLOPERAND, "Cannot use memory reference with EIP in any mode", 0));
+			return 0;
+			break;
+		case MEM_EC:
+		case MEM_DIR_EC:
+			raiseException(newException(EX_ILLOPERAND, "Cannot use memory reference with EC in any mode", 0));
+			return 0;
+			break;
+		case MEM_EPN:
+		case MEM_DIR_EPN:
+			raiseException(newException(EX_ILLOPERAND, "Cannot use memory reference with EPN in any mode", 0));
+			return 0;
+			break;
+		case MEM_EMA:
+		case MEM_DIR_EMA:
+			raiseException(newException(EX_ILLOPERAND, "Cannot use memory reference with EMA in any mode", 0));
 			return 0;
 			break;
 		case MEM_DIR:
@@ -484,8 +529,20 @@ int performArithmetic(int X, int flagX, int Y, int flagY, int operation) {
 			raiseException(newException(EX_ILLOPERAND, "Illegal operand IP. Cannot alter readonly register", 0));
 			return 0;
 			break;
-		case EFR:
-			raiseException(newException(EX_ILLOPERAND, "Illegal operand EFR. Cannot alter readonly register", 0));
+		case EIP:
+			raiseException(newException(EX_ILLOPERAND, "Illegal operand EIP. Cannot alter readonly register", 0));
+			return 0;
+			break;
+		case EC:
+			raiseException(newException(EX_ILLOPERAND, "Illegal operand EC. Cannot alter readonly register", 0));
+			return 0;
+			break;
+		case EPN:
+			raiseException(newException(EX_ILLOPERAND, "Illegal operand EPN. Cannot alter readonly register", 0));
+			return 0;
+			break;
+		case EMA:
+			raiseException(newException(EX_ILLOPERAND, "Illegal operand EMA. Cannot alter readonly register", 0));
 			return 0;
 			break;
 		default:
@@ -519,8 +576,20 @@ int performArithmetic(int X, int flagX, int Y, int flagY, int operation) {
 				raiseException(newException(EX_ILLOPERAND, "Illegal operand IP. Cannot alter readonly register", 0));
 				return 0;
 				break;
-			case EFR:
-				raiseException(newException(EX_ILLOPERAND, "Illegal operand EFR. Cannot alter readonly register", 0));
+			case EIP:
+				raiseException(newException(EX_ILLOPERAND, "Illegal operand EIP. Cannot alter readonly register", 0));
+				return 0;
+				break;
+			case EC:
+				raiseException(newException(EX_ILLOPERAND, "Illegal operand EC. Cannot alter readonly register", 0));
+				return 0;
+				break;
+			case EPN:
+				raiseException(newException(EX_ILLOPERAND, "Illegal operand EPN. Cannot alter readonly register", 0));
+				return 0;
+				break;
+			case EMA:
+				raiseException(newException(EX_ILLOPERAND, "Illegal operand EMA. Cannot alter readonly register", 0));
 				return 0;
 				break;
 			default:
@@ -604,8 +673,20 @@ int performLogic(int X, int flagX, int Y, int flagY, int operation) {
 			raiseException(newException(EX_ILLOPERAND, "Illegal operand IP. Cannot alter readonly register", 0));
 			return 0;
 			break;
-		case EFR:
-			raiseException(newException(EX_ILLOPERAND, "Illegal operand EFR. Cannot alter readonly register", 0));
+		case EIP:
+			raiseException(newException(EX_ILLOPERAND, "Illegal operand EIP. Cannot alter readonly register", 0));
+			return 0;
+			break;
+		case EC:
+			raiseException(newException(EX_ILLOPERAND, "Illegal operand EC. Cannot alter readonly register", 0));
+			return 0;
+			break;
+		case EPN:
+			raiseException(newException(EX_ILLOPERAND, "Illegal operand EPN. Cannot alter readonly register", 0));
+			return 0;
+			break;
+		case EMA:
+			raiseException(newException(EX_ILLOPERAND, "Illegal operand EMA. Cannot alter readonly register", 0));
 			return 0;
 			break;
 		default:
@@ -630,8 +711,20 @@ int performLogic(int X, int flagX, int Y, int flagY, int operation) {
 			raiseException(newException(EX_ILLOPERAND, "Illegal operand IP. Cannot alter readonly register", 0));
 			return 0;
 			break;
-		case EFR:
-			raiseException(newException(EX_ILLOPERAND, "Illegal operand EFR. Cannot alter readonly register", 0));
+		case EIP:
+			raiseException(newException(EX_ILLOPERAND, "Illegal operand EIP. Cannot alter readonly register", 0));
+			return 0;
+			break;
+		case EC:
+			raiseException(newException(EX_ILLOPERAND, "Illegal operand EC. Cannot alter readonly register", 0));
+			return 0;
+			break;
+		case EPN:
+			raiseException(newException(EX_ILLOPERAND, "Illegal operand EPN. Cannot alter readonly register", 0));
+			return 0;
+			break;
+		case EMA:
+			raiseException(newException(EX_ILLOPERAND, "Illegal operand EMA. Cannot alter readonly register", 0));
 			return 0;
 			break;
 		default:
@@ -688,7 +781,10 @@ int performBranching(int X, int flagX, int Y, int flagY, int operation) {
 				case IP:
 				case PTBR:
 				case PTLR:
-				case EFR:
+				case EIP:
+				case EC:
+				case EPN:
+				case EMA:
 					e = isRegisterInaccessible(X);
 					if (e.code != EX_NONE) {
 						raiseException(e);
@@ -745,7 +841,10 @@ int performPush(int X, int flagX) {
 		case IP:
 		case PTBR:
 		case PTLR:
-		case EFR:
+		case EIP:
+		case EC:
+		case EPN:
+		case EMA:
 			e = isRegisterInaccessible(X);
 			if (e.code != EX_NONE) {
 				raiseException(e);
@@ -784,8 +883,20 @@ int performPop(int X, int flagX) {
 			raiseException(newException(EX_ILLOPERAND, "Illegal operand IP. Cannot alter readonly register", 0));
 			return 0;
 			break;
-		case EFR:
-			raiseException(newException(EX_ILLOPERAND, "Illegal operand EFR. Cannot alter readonly register", 0));
+		case EIP:
+			raiseException(newException(EX_ILLOPERAND, "Illegal operand EIP. Cannot alter readonly register", 0));
+			return 0;
+			break;
+		case EC:
+			raiseException(newException(EX_ILLOPERAND, "Illegal operand EC. Cannot alter readonly register", 0));
+			return 0;
+			break;
+		case EPN:
+			raiseException(newException(EX_ILLOPERAND, "Illegal operand EPN. Cannot alter readonly register", 0));
+			return 0;
+			break;
+		case EMA:
+			raiseException(newException(EX_ILLOPERAND, "Illegal operand EMA. Cannot alter readonly register", 0));
 			return 0;
 			break;
 		default:
@@ -906,8 +1017,20 @@ int performIN(int X, int flagX) {
 		case IP:
 			raiseException(newException(EX_ILLOPERAND, "Illegal operand IP. Cannot alter readonly register", 0));
 			return 0;
-		case EFR:
-			raiseException(newException(EX_ILLOPERAND, "Illegal operand EFR. Cannot alter readonly register", 0));
+		case EIP:
+			raiseException(newException(EX_ILLOPERAND, "Illegal operand EIP. Cannot alter readonly register", 0));
+			return 0;
+			break;
+		case EC:
+			raiseException(newException(EX_ILLOPERAND, "Illegal operand EC. Cannot alter readonly register", 0));
+			return 0;
+			break;
+		case EPN:
+			raiseException(newException(EX_ILLOPERAND, "Illegal operand EPN. Cannot alter readonly register", 0));
+			return 0;
+			break;
+		case EMA:
+			raiseException(newException(EX_ILLOPERAND, "Illegal operand EMA. Cannot alter readonly register", 0));
 			return 0;
 			break;
 		default:
@@ -932,7 +1055,10 @@ int performOUT(int X, int flagX) {
 		case IP:
 		case PTBR:
 		case PTLR:
-		case EFR:
+		case EIP:
+		case EC:
+		case EPN:
+		case EMA:
 			e = isRegisterInaccessible(X);
 			if (e.code != EX_NONE) {
 				raiseException(e);
@@ -965,7 +1091,10 @@ int performLoadStore(int X, int flagX, int Y, int flagY, int instruction) {
 		case IP:
 		case PTBR:
 		case PTLR:
-		case EFR:
+		case EIP:
+		case EC:
+		case EPN:
+		case EMA:
 			e = isRegisterInaccessible(X);
 			if (e.code != EX_NONE) {
 				raiseException(e);
@@ -990,7 +1119,10 @@ int performLoadStore(int X, int flagX, int Y, int flagY, int instruction) {
 		case IP:
 		case PTBR:
 		case PTLR:
-		case EFR:
+		case EIP:
+		case EC:
+		case EPN:
+		case EMA:
 			e = isRegisterInaccessible(Y);
 			if (e.code != EX_NONE) {
 				raiseException(e);
